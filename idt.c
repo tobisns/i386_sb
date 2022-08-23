@@ -19,11 +19,12 @@ struct regs {
     unsigned int eip, cs, eflags, useresp, ss;
 };
 
-struct idt_entry idt[256];
-struct idt_descriptor idtp;
-
 unsigned short* vid_ptr;
 
+
+
+struct idt_entry idt[256];
+struct idt_descriptor idtp;
 
 extern void idt_load();
 
@@ -61,15 +62,16 @@ extern void isrs_install(){
     return;
 }
 
-unsigned char* exception_messages[] =
+unsigned short exception_messages[] =
 {
-    'T'
+    0x731,0x732
 };
 
 extern void fault_handler(struct regs* r){
     if(r->int_no < 32){
-        vid_ptr = (unsigned short*)0xb8002; 
-        *vid_ptr = 0xa31;//exception_messages[r->int_no];
+        exception_messages[0] = 0x731;
+        vid_ptr = (unsigned short*)0xb8000+79;
+        *vid_ptr = (short)exception_messages[1];//exception_messages[r->int_no];
         for(;;);
     }
 }
