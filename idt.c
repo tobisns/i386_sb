@@ -19,7 +19,13 @@ struct regs {
     unsigned int eip, cs, eflags, useresp, ss;
 };
 
-unsigned short* vid_ptr;
+unsigned short* vid_ptr = (short*)0xb8000;
+
+void puts(unsigned char* string, unsigned char color){
+    while(*string!='\0'){
+        *(vid_ptr++) = (unsigned short)((color << 8)|*(string++));
+    }
+}
 
 
 
@@ -62,16 +68,14 @@ extern void isrs_install(){
     return;
 }
 
-unsigned short exception_messages[] =
+unsigned char* exception_messages[] =
 {
-    0x731,0x732
+    "Error, Division by Zero! :D"
 };
 
 extern void fault_handler(struct regs* r){
     if(r->int_no < 32){
-        exception_messages[0] = 0x731;
-        vid_ptr = (unsigned short*)0xb8000+79;
-        *vid_ptr = (short)exception_messages[1];//exception_messages[r->int_no];
+        puts(exception_messages[r->int_no],0x1a);//exception_messages[r->int_no];
         for(;;);
     }
 }
